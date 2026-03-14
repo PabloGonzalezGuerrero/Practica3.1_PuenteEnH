@@ -9,7 +9,7 @@ Tmuertos = 0;
 nciclos = 700;
 ssamples = 200;
 
-Dvec = 0.05:0.05:0.95;
+Dvec = [0 0.05:0.05:0.95 1];
 
 Vr_bip = zeros(size(Dvec));
 Vr_uni = zeros(size(Dvec));
@@ -18,9 +18,6 @@ model = 'PuenteH_dcdc_CUESTION2';
 load_system(model);
 
 StopTime = num2str(nciclos*Ts);
-
-% Instante a partir del cual tomamos régimen permanente
-t0 = 0.06;
 
 for k = 1:length(Dvec)
 
@@ -42,16 +39,10 @@ for k = 1:length(Dvec)
 
     simOut = sim(model,'StopTime',StopTime);
     V = simOut.VAB;
-
-    t   = V.time;
     vab = V.signals.values;
-    
 
-    idx = (t >= t0);
-    vab_ss = vab(idx);
-
-    Vmed = mean(vab_ss);
-    vr   = vab_ss - Vmed;
+    Vmed = mean(vab);
+    vr   = vab - Vmed;
     Vr_bip(k) = sqrt(mean(vr.^2));
 
     %% Unipolar
@@ -60,25 +51,24 @@ for k = 1:length(Dvec)
 
     simOut = sim(model,'StopTime',StopTime);
     V = simOut.VAB;
-
-    t   = V.time;
     vab = V.signals.values;
 
-    idx = (t >= t0);
-    vab_ss = vab(idx);
-
-    Vmed = mean(vab_ss);
-    vr   = vab_ss - Vmed;
+    Vmed = mean(vab);
+    vr   = vab - Vmed;
     Vr_uni(k) = sqrt(mean(vr.^2));
 
 end
 
+%% Normalización final
+Vr_bip = Vr_bip / VI;
+Vr_uni = Vr_uni / VI;
+
 %% Gráfica
 figure;
-plot(Dvec, Vr_bip,'LineWidth', 1.5); hold on;
-plot(Dvec, Vr_uni,'LineWidth', 1.5);
+plot(Dvec, Vr_bip,'LineWidth',1.5); hold on;
+plot(Dvec, Vr_uni,'LineWidth',1.5);
 grid on;
 xlabel('D_{T_A^+}');
-ylabel('V_{AB,ripple,rms} (V)');
+ylabel('V_{AB,ripple,rms}/V_I');
 legend('Bipolar','Unipolar','Location','best');
-title('V_{AB,ripple,rms} frente a D_{T_A^+}');
+title('Tensión de rizado normalizada frente a D_{T_A^+}');
