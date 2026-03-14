@@ -14,7 +14,7 @@ Dvec = 0.05:0.05:0.95;
 Vr_bip = zeros(size(Dvec));
 Vr_uni = zeros(size(Dvec));
 
-model = 'PuenteH_dcdc_alumnos_CUESTION2';
+model = 'PuenteH_dcdc_CUESTION2';
 load_system(model);
 
 StopTime = num2str(nciclos*Ts);
